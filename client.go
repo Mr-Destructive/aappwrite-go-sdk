@@ -28,24 +28,39 @@ func (clt *Client) SetSelfSigned(status bool) {
 
 // AddHeader add a new custom header that the Client should send on each request
 func (clt *Client) AddHeader(key string, value string) {
+	if clt.headers == nil {
+		clt.headers = make(map[string]string) 
+	}
 	clt.headers[key] = value
 }
 
 // Your project ID
 func (clt *Client) SetProject(value string) {
+	if clt.headers == nil {
+		clt.headers = make(map[string]string) 
+	}
 	clt.headers["X-Appwrite-Project"] = value
 }
 
 // Your secret API key
 func (clt *Client) SetKey(value string) {
+	if clt.headers == nil {
+		clt.headers = make(map[string]string) 
+	}
 	clt.headers["X-Appwrite-Key"] = value
 }
 
 func (clt *Client) SetLocale(value string) {
+	if clt.headers == nil {
+		clt.headers = make(map[string]string) 
+	}
 	clt.headers["X-Appwrite-Locale"] = value
 }
 
 func (clt *Client) SetMode(value string) {
+	if clt.headers == nil {
+		clt.headers = make(map[string]string) 
+	}
 	clt.headers["X-Appwrite-Mode"] = value
 }
 
