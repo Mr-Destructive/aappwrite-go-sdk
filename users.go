@@ -6,12 +6,12 @@ import (
 
 // Users service
 type Users struct {
-	client Client
+	Client Client
 }
 
 func NewUsers(clt Client) Users {  
     service := Users{
-		client: clt,
+		Client: clt,
 	}
 
     return service
@@ -29,7 +29,7 @@ func (srv *Users) List(Search string, Limit int, Offset int, OrderType string) (
 		"orderType": OrderType,
 	}
 
-	return srv.client.Call("GET", path, nil, params)
+	return srv.Client.Call("GET", path, nil, params)
 }
 
 // Create create a new user.
@@ -42,7 +42,7 @@ func (srv *Users) Create(Email string, Password string, Name string) (map[string
 		"name": Name,
 	}
 
-	return srv.client.Call("POST", path, nil, params)
+	return srv.Client.Call("POST", path, nil, params)
 }
 
 // Get get user by its unique ID.
@@ -53,7 +53,7 @@ func (srv *Users) Get(UserId string) (map[string]interface{}, error) {
 	params := map[string]interface{}{
 	}
 
-	return srv.client.Call("GET", path, nil, params)
+	return srv.Client.Call("GET", path, nil, params)
 }
 
 // GetLogs get user activity logs list by its unique ID.
@@ -64,7 +64,7 @@ func (srv *Users) GetLogs(UserId string) (map[string]interface{}, error) {
 	params := map[string]interface{}{
 	}
 
-	return srv.client.Call("GET", path, nil, params)
+	return srv.Client.Call("GET", path, nil, params)
 }
 
 // GetPrefs get user preferences by its unique ID.
@@ -75,7 +75,7 @@ func (srv *Users) GetPrefs(UserId string) (map[string]interface{}, error) {
 	params := map[string]interface{}{
 	}
 
-	return srv.client.Call("GET", path, nil, params)
+	return srv.Client.Call("GET", path, nil, params)
 }
 
 // UpdatePrefs update user preferences by its unique ID. You can pass only the
@@ -88,7 +88,7 @@ func (srv *Users) UpdatePrefs(UserId string, Prefs map[string]interface{}) (map[
 		"prefs": Prefs,
 	}
 
-	return srv.client.Call("PATCH", path, nil, params)
+	return srv.Client.Call("PATCH", path, nil, params)
 }
 
 // GetSessions get user sessions list by its unique ID.
@@ -99,7 +99,7 @@ func (srv *Users) GetSessions(UserId string) (map[string]interface{}, error) {
 	params := map[string]interface{}{
 	}
 
-	return srv.client.Call("GET", path, nil, params)
+	return srv.Client.Call("GET", path, nil, params)
 }
 
 // DeleteSessions delete all user sessions by its unique ID.
@@ -110,7 +110,7 @@ func (srv *Users) DeleteSessions(UserId string) (map[string]interface{}, error) 
 	params := map[string]interface{}{
 	}
 
-	return srv.client.Call("DELETE", path, nil, params)
+	return srv.Client.Call("DELETE", path, nil, params)
 }
 
 // DeleteSession delete user sessions by its unique ID.
@@ -122,7 +122,7 @@ func (srv *Users) DeleteSession(UserId string, SessionId string) (map[string]int
 		"sessionId": SessionId,
 	}
 
-	return srv.client.Call("DELETE", path, nil, params)
+	return srv.Client.Call("DELETE", path, nil, params)
 }
 
 // UpdateStatus update user status by its unique ID.
@@ -134,5 +134,5 @@ func (srv *Users) UpdateStatus(UserId string, Status string) (map[string]interfa
 		"status": Status,
 	}
 
-	return srv.client.Call("PATCH", path, nil, params)
+	return srv.Client.Call("PATCH", path, nil, params)
 }
