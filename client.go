@@ -78,7 +78,7 @@ func (clt *Client) Call(method string, path string, headers map[string]interface
 	urlPath := clt.endpoint + path
 	isGet := strings.ToUpper(method) == "GET"
 
-	var reqBody *strings.Reader
+	reqBody := new(strings.Reader)
 	if !isGet {
 		frm := url.Values{}
 		for key, val := range params {
