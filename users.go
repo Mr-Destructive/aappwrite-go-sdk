@@ -1,6 +1,7 @@
 package appwrite
 
 import (
+	"encoding/json"
 	"strings"
 )
 
