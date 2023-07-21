@@ -16,24 +16,31 @@ type UserObject struct {
 	Email             string                 `json:"email,omitempty"`
 	Status            bool                   `json:"status,omitempty"`
 	Phone             string                 `json:"phone,omitempty"`
-	CreatedAt         string                 `json:"$created_at"`
-	UpdatedAt         string                 `json:"$updated_at"`
-	EmailVerification bool                   `json:"email_verification"`
-	PhoneVerification bool                   `json:"phone_verification"`
+	CreatedAt         string                 `json:"$createdAt"`
+	UpdatedAt         string                 `json:"$updatedAt"`
+	EmailVerification bool                   `json:"emailVerification"`
+	PhoneVerification bool                   `json:"phoneVerification"`
 	Registration      string                 `json:"registration"`
 	Prefs             map[string]interface{} `json:"prefs"`
-	PasswordUpdatedAt string                 `json:"password_updated_at"`
+	PasswordUpdatedAt string                 `json:"passwordUpdated"`
 	Password          string                 `json:"password"`
 	HashOptions       map[string]int         `json:"hashOptions"`
 	Hash              string                 `json:"hash"`
 }
 
-func NewUsers(clt Client) Users {  
-    service := Users{
+type Response struct {
+	Sum    int          `json:"sum"`
+	Offset int          `json:"offset"`
+	Limit  int          `json:"limit"`
+	Users  []UserObject `json:"users"`
+}
+
+func NewUsers(clt Client) Users {
+	service := Users{
 		Client: clt,
 	}
 
-    return service
+	return service
 }
 
 // List get a list of all the project users. You can use the query params to
@@ -42,21 +49,21 @@ func (srv *Users) List(Search string, Limit int, Offset int, OrderType string) (
 	path := "/users"
 
 	params := map[string]interface{}{
-		"search": Search,
-		"limit": Limit,
-		"offset": Offset,
+		"search":    Search,
+		"limit":     Limit,
+		"offset":    Offset,
 		"orderType": OrderType,
 	}
 
-	resp, err := srv.Client.Call("GET", path, srv.Client.headers, params)
+	resp, err := srv.Client.CallAPI("GET", path, srv.Client.headers, params)
 	if err != nil {
 		return nil, err
 	}
-	var result []UserObject
+	var result Response
 	if err := json.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
-	return result, nil
+	return result.Users, nil
 }
 
 // Create create a new user.
@@ -64,9 +71,9 @@ func (srv *Users) Create(Email string, Password string, Name string) (map[string
 	path := "/users"
 
 	params := map[string]interface{}{
-		"email": Email,
+		"email":    Email,
 		"password": Password,
-		"name": Name,
+		"name":     Name,
 	}
 
 	return srv.Client.Call("POST", path, srv.Client.headers, params)
@@ -77,8 +84,7 @@ func (srv *Users) Get(UserId string) (map[string]interface{}, error) {
 	r := strings.NewReplacer("{userId}", UserId)
 	path := r.Replace("/users/{userId}")
 
-	params := map[string]interface{}{
-	}
+	params := map[string]interface{}{}
 
 	return srv.Client.Call("GET", path, srv.Client.headers, params)
 }
@@ -88,8 +94,7 @@ func (srv *Users) GetLogs(UserId string) (map[string]interface{}, error) {
 	r := strings.NewReplacer("{userId}", UserId)
 	path := r.Replace("/users/{userId}/logs")
 
-	params := map[string]interface{}{
-	}
+	params := map[string]interface{}{}
 
 	return srv.Client.Call("GET", path, srv.Client.headers, params)
 }
@@ -99,8 +104,7 @@ func (srv *Users) GetPrefs(UserId string) (map[string]interface{}, error) {
 	r := strings.NewReplacer("{userId}", UserId)
 	path := r.Replace("/users/{userId}/prefs")
 
-	params := map[string]interface{}{
-	}
+	params := map[string]interface{}{}
 
 	return srv.Client.Call("GET", path, srv.Client.headers, params)
 }
@@ -123,8 +127,7 @@ func (srv *Users) GetSessions(UserId string) (map[string]interface{}, error) {
 	r := strings.NewReplacer("{userId}", UserId)
 	path := r.Replace("/users/{userId}/sessions")
 
-	params := map[string]interface{}{
-	}
+	params := map[string]interface{}{}
 
 	return srv.Client.Call("GET", path, srv.Client.headers, params)
 }
@@ -134,8 +137,7 @@ func (srv *Users) DeleteSessions(UserId string) (map[string]interface{}, error) 
 	r := strings.NewReplacer("{userId}", UserId)
 	path := r.Replace("/users/{userId}/sessions")
 
-	params := map[string]interface{}{
-	}
+	params := map[string]interface{}{}
 
 	return srv.Client.Call("DELETE", path, srv.Client.headers, params)
 }

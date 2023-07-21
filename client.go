@@ -2,7 +2,7 @@ package appwrite
 
 import (
 	"encoding/json"
-  	"io/ioutil"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,7 +29,7 @@ func (clt *Client) SetSelfSigned(status bool) {
 // AddHeader add a new custom header that the Client should send on each request
 func (clt *Client) AddHeader(key string, value string) {
 	if clt.headers == nil {
-		clt.headers = make(map[string]interface{}) 
+		clt.headers = make(map[string]interface{})
 	}
 	clt.headers[key] = value
 }
@@ -37,7 +37,7 @@ func (clt *Client) AddHeader(key string, value string) {
 // Your project ID
 func (clt *Client) SetProject(value string) {
 	if clt.headers == nil {
-		clt.headers = make(map[string]interface{}) 
+		clt.headers = make(map[string]interface{})
 	}
 	clt.headers["X-Appwrite-Project"] = value
 }
@@ -45,21 +45,21 @@ func (clt *Client) SetProject(value string) {
 // Your secret API key
 func (clt *Client) SetKey(value string) {
 	if clt.headers == nil {
-		clt.headers = make(map[string]interface{}) 
+		clt.headers = make(map[string]interface{})
 	}
 	clt.headers["X-Appwrite-Key"] = value
 }
 
 func (clt *Client) SetLocale(value string) {
 	if clt.headers == nil {
-		clt.headers = make(map[string]interface{}) 
+		clt.headers = make(map[string]interface{})
 	}
 	clt.headers["X-Appwrite-Locale"] = value
 }
 
 func (clt *Client) SetMode(value string) {
 	if clt.headers == nil {
-		clt.headers = make(map[string]interface{}) 
+		clt.headers = make(map[string]interface{})
 	}
 	clt.headers["X-Appwrite-Mode"] = value
 }
@@ -119,7 +119,7 @@ func (clt *Client) Call(method string, path string, headers map[string]interface
 
 	// Handle response
 	defer response.Body.Close()
- 
+
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
@@ -129,4 +129,68 @@ func (clt *Client) Call(method string, path string, headers map[string]interface
 	json.Unmarshal(responseData, &jsonResponse)
 
 	return jsonResponse, nil
+}
+
+func (clt *Client) CallAPI(method string, path string, headers map[string]interface{}, params map[string]interface{}) ([]byte, error) {
+	if clt.client == nil {
+		// Create HTTP client
+		clt.client = &http.Client{}
+	}
+
+	if clt.selfSigned {
+		// Allow self signed requests
+	}
+
+	urlPath := clt.endpoint + path
+	isGet := strings.ToUpper(method) == "GET"
+
+	reqBody := new(strings.Reader)
+	if !isGet {
+		frm := url.Values{}
+		for key, val := range params {
+			frm.Add(key, ToString(val))
+		}
+		reqBody = strings.NewReader(frm.Encode())
+	}
+
+	// Create and modify HTTP request before sending
+	req, err := http.NewRequest(method, urlPath, reqBody)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set Client headers
+	for key, val := range clt.headers {
+		req.Header.Set(key, ToString(val))
+	}
+
+	// Set Custom headers
+	for key, val := range headers {
+		req.Header.Set(key, ToString(val))
+	}
+
+	if isGet {
+		q := req.URL.Query()
+		for key, val := range params {
+			q.Add(key, ToString(val))
+		}
+		req.URL.RawQuery = q.Encode()
+	}
+
+	// Make request
+	response, err := clt.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Handle response
+	defer response.Body.Close()
+
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
+
+	return responseData, nil
 }
