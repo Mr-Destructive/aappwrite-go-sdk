@@ -9,6 +9,24 @@ type Users struct {
 	Client Client
 }
 
+type UserObject struct {
+	Id                string                 `json:"$id"`
+	Name              string                 `json:"name,omitempty"`
+	Email             string                 `json:"email,omitempty"`
+	Status            bool                   `json:"status,omitempty"`
+	Phone             string                 `json:"phone,omitempty"`
+	CreatedAt         string                 `json:"$created_at"`
+	UpdatedAt         string                 `json:"$updated_at"`
+	EmailVerification bool                   `json:"email_verification"`
+	PhoneVerification bool                   `json:"phone_verification"`
+	Registration      string                 `json:"registration"`
+	Prefs             map[string]interface{} `json:"prefs"`
+	PasswordUpdatedAt string                 `json:"password_updated_at"`
+	Password          string                 `json:"password"`
+	HashOptions       map[string]int         `json:"hashOptions"`
+	Hash              string                 `json:"hash"`
+}
+
 func NewUsers(clt Client) Users {  
     service := Users{
 		Client: clt,
@@ -19,7 +37,7 @@ func NewUsers(clt Client) Users {
 
 // List get a list of all the project users. You can use the query params to
 // filter your results.
-func (srv *Users) List(Search string, Limit int, Offset int, OrderType string) (map[string]interface{}, error) {
+func (srv *Users) List(Search string, Limit int, Offset int, OrderType string) ([]UserObject, error) {
 	path := "/users"
 
 	params := map[string]interface{}{
@@ -29,7 +47,15 @@ func (srv *Users) List(Search string, Limit int, Offset int, OrderType string) (
 		"orderType": OrderType,
 	}
 
-	return srv.Client.Call("GET", path, srv.Client.headers, params)
+	resp, err := srv.Client.Call("GET", path, srv.Client.headers, params)
+	if err != nil {
+		return nil, err
+	}
+	var result []UserObject
+	if err := json.Unmarshal(resp, &result); err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 // Create create a new user.
