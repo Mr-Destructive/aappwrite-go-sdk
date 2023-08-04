@@ -28,7 +28,7 @@ type UserObject struct {
 	Hash              string                 `json:"hash"`
 }
 
-type Response struct {
+type UserListResponse struct {
 	Sum    int          `json:"sum"`
 	Offset int          `json:"offset"`
 	Limit  int          `json:"limit"`
@@ -59,7 +59,7 @@ func (srv *Users) List(Search string, Limit int, Offset int, OrderType string) (
 	if err != nil {
 		return nil, err
 	}
-	var result Response
+	var result UserListResponse
 	if err := json.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
