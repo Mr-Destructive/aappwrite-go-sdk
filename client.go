@@ -191,6 +191,5 @@ func (clt *Client) CallAPI(method string, path string, headers map[string]interf
 		return nil, err
 	}
 
-
 	return responseData, nil
 }
