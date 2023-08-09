@@ -63,6 +63,26 @@ type Collection struct {
 	Indexes          []Index     `json:"indexes"`
 }
 
+type Document struct {
+	Fields       map[string]interface{}
+	Id           string   `json:"$id"`
+	CreatedAt    string   `json:"$createdAt"`
+	UpdatedAt    string   `json:"$updatedAt"`
+	Permissions  []string `json:"permissions"`
+	CollectionId string   `json:"$collectionId"`
+	DatabaseId   string   `json:"$databaseId"`
+}
+
+type AttributeList struct {
+	Total      int         `json:"total"`
+	Attributes []Attribute `json:"attributes"`
+}
+
+type DocumentList struct {
+	Total     int        `json:"total"`
+	Documents []Document `json:"documents"`
+}
+
 type CollectionList struct {
 	Total       int          `json:"total"`
 	Collections []Collection `json:"collections"`
@@ -108,7 +128,7 @@ func (srv *Database) GetDatabase(databaseId string) (*DatabaseObject, error) {
 // different API modes](/docs/admin).
 func (srv *Database) ListCollections(databaseId, Search string, Queries []string) (*CollectionList, error) {
 	r := strings.NewReplacer("{databaseId}", databaseId)
-	path := r.Replace("/database/{dattableId}/collections")
+	path := r.Replace("/databases/{databaseId}/collections")
 
 	params := map[string]interface{}{
 		"search":  Search,
@@ -123,6 +143,7 @@ func (srv *Database) ListCollections(databaseId, Search string, Queries []string
 	if err := json.Unmarshal(resp, &result); err != nil {
 		return nil, err
 	}
+
 	return &result, nil
 
 }
@@ -190,9 +211,10 @@ func (srv *Database) DeleteCollection(CollectionId string) (map[string]interface
 // params to filter your results. On admin mode, this endpoint will return a
 // list of all of the project documents. [Learn more about different API
 // modes](/docs/admin).
-func (srv *Database) ListDocuments(CollectionId string, Filters []interface{}, Offset int, Limit int, OrderField string, OrderType string, OrderCast string, Search string, First int, Last int) (map[string]interface{}, error) {
-	r := strings.NewReplacer("{collectionId}", CollectionId)
-	path := r.Replace("/database/collections/{collectionId}/documents")
+func (srv *Database) ListDocuments(databaseId, collectionId string, Filters []interface{}, Offset int, Limit int, OrderField string, OrderType string, OrderCast string, Search string, First int, Last int) (*DocumentList, error) {
+
+	r := strings.NewReplacer("{databaseId}", databaseId, "{collectionId}", collectionId)
+	path := r.Replace("/databases/{databaseId}/collections/{collectionId}/documents")
 
 	params := map[string]interface{}{
 		"filters":     Filters,
@@ -206,7 +228,42 @@ func (srv *Database) ListDocuments(CollectionId string, Filters []interface{}, O
 		"last":        Last,
 	}
 
-	return srv.Client.Call("GET", path, nil, params)
+	resp, err := srv.Client.CallAPI("GET", path, srv.Client.headers, params)
+	if err != nil {
+		return nil, err
+	}
+	path = r.Replace("/databases/{databaseId}/collections/{collectionId}/attributes")
+	resp2, err := srv.Client.CallAPI("GET", path, srv.Client.headers, params)
+	if err != nil {
+		return nil, err
+	}
+	var attributes AttributeList
+	if err := json.Unmarshal(resp2, &attributes); err != nil {
+		return nil, err
+	}
+
+	var result DocumentList
+	var doc map[string]interface{}
+	json.Unmarshal(resp, &doc)
+
+	if err := json.Unmarshal(resp, &result); err != nil {
+		return nil, err
+	}
+
+	for id := range result.Documents {
+		result.Documents[id].Fields = make(map[string]interface{})
+		for _, attribute := range attributes.Attributes {
+			docs := doc["documents"].([]interface{})
+			doc := docs[id].(map[string]interface{})
+			val := doc[attribute.Key]
+			if val != nil {
+				result.Documents[id].Fields[attribute.Key] = val
+			} else {
+				result.Documents[id].Fields[attribute.Key] = nil
+			}
+		}
+	}
+	return &result, nil
 }
 
 // CreateDocument create a new Document.
